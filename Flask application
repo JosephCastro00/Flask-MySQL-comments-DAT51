@@ -1,0 +1,69 @@
+from flask import Flask, render_template, request, redirect, url_for, flash
+import mysql.connector
+
+app = Flask(__name__)
+app.secret_key = "secret123"   # Needed for flash messages
+
+# Database connection function
+def get_connection():
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",            # change if needed
+        password="",            # change if needed
+        database="dat51_comments"
+    )
+
+# -----------------------------
+# Home Page (Form)
+# -----------------------------
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+# -----------------------------
+# Save Comment
+# -----------------------------
+@app.route("/add_comment", methods=["POST"])
+def add_comment():
+    username = request.form.get("username")
+    comment = request.form.get("comment")
+
+    # Validation
+    if not username or not comment:
+        flash("Name and comment cannot be empty.")
+        return redirect(url_for("index"))
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    sql = "INSERT INTO comments (username, comment_text) VALUES (%s, %s)"
+    cursor.execute(sql, (username, comment))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    flash("Comment added successfully.")
+    return redirect(url_for("comments"))
+
+# -----------------------------
+# Display All Comments
+# -----------------------------
+@app.route("/comments")
+def comments():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM comments ORDER BY created_at DESC")
+    all_comments = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template("comments.html", comments=all_comments)
+
+# -----------------------------
+# Run App
+# -----------------------------
+if __name__ == "__main__":
+    app.run(debug=True)
