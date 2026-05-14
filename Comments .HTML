@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Comments</title>
+</head>
+<body>
+
+<h1>All Comments</h1>
+
+<a href="/">Back to Form</a>
+<br><br>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Name</th>
+        <th>Comment</th>
+        <th>Timestamp</th>
+    </tr>
+
+    {% for c in comments %}
+    <tr>
+        <td>{{ c.username }}</td>
+        <td>{{ c.comment_text }}</td>
+        <td>{{ c.created_at }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>
